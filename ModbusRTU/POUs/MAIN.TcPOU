@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <POU Name="MAIN" Id="{68d2e4c8-fc37-4655-8c1a-780d28187236}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+	Loadcells			: FB_Loadcells(ModbusAddresses:= LoadcellAddresses, ReadPeriod:= T#1s);
+	LoadsInKg			: ARRAY[1..MAX_LOADCELLS] OF UINT; //loads on loadcells
+END_VAR
+VAR CONSTANT
+	MAX_LOADCELLS		: UINT:= 10;
+	LoadcellAddresses	: ARRAY[1..MAX_LOADCELLS] OF BYTE:= [1,2,3,4,0];
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[Loadcells.Cyclic(LoadsInKg:= LoadsInKg);
+]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,135 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <POU Name="FB_Loadcells" Id="{9aa9d477-703e-4e3d-8e9b-2a2467763e7c}" SpecialFunc="None">
+    <Declaration><![CDATA[{attribute 'no_explicit_call' := 'do not call FB_Loadcells directly'}
+FUNCTION_BLOCK PUBLIC FB_Loadcells
+VAR
+	Modbus			: FB_Modbus;
+	ModbusAddresses	: ARRAY[1..MAX_LOADCELLS] OF BYTE; //addresses of loadcells to read, end with a 0 address
+	ModbusErrors	: ARRAY[1..MAX_LOADCELLS] OF MODBUS_ERRORS; //keep track of errors
+	_numLoadcells	: UINT; //number of actual addresses to read from above array
+	ReadPeriod		: TIME; //poll the loadcells with this period if we can, else just go as fast as we can
+	LoadcellsState	: (Idle,ReadLoadcell,WaitForResult,GetReadyForNextRead,Error);
+	_cursor			: UINT;
+	ReadPeriodTimer	: TON;
+END_VAR
+VAR CONSTANT
+	MAX_LOADCELLS	: UINT:= 10;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="Cyclic" Id="{aa7f379c-9425-48cf-ba41-6b733da6dc4d}">
+      <Declaration><![CDATA[METHOD PUBLIC Cyclic
+VAR_IN_OUT
+	LoadsInKg		: ARRAY[1..MAX_LOADCELLS] OF UINT; //loads on loadcells
+END_VAR
+VAR
+	_allgood		: BOOL;
+	_busy			: BOOL;
+END_VAR
+VAR_INST
+	kg				: WORD;
+	InitDone		: BOOL:= FALSE;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NumLoadcells = 0 THEN
+	RETURN;
+END_IF
+
+IF NOT InitDone THEN
+	Init();
+	InitDone:= TRUE;
+END_IF
+
+ReadPeriodTimer(IN:= TRUE, PT:= ReadPeriod);
+
+CASE LoadcellsState OF
+	Idle:
+		//
+
+	ReadLoadcell:
+		Modbus.ReadHoldingRegisters(UnitID:= ModbusAddresses[_cursor],
+										Quantity:= 1, //only interested in a single register
+										MBAddr:= 0, //the first in-fact (400001 is current load in kg)
+										Timeout:= T#1S,
+										StartedNewRead => _allgood);
+		IF _allgood THEN
+			LoadcellsState:= WaitForResult;
+		END_IF
+
+	WaitForResult:
+		Modbus.Cyclic(Busy => _busy, ErrorID => ModbusErrors[_cursor], FirstRegister => kg);
+		IF NOT _busy THEN
+			LoadsInKg[_cursor]:= WORD_TO_UINT(kg);
+			LoadcellsState:= GetReadyForNextRead;
+		END_IF
+
+	GetReadyForNextRead:
+		IF _cursor < NumLoadcells THEN
+			_cursor:= _cursor + 1;
+			LoadcellsState:= ReadLoadcell;
+		ELSE
+			IF ReadPeriodTimer.Q THEN
+				_cursor:= 1;
+				ReadPeriodTimer(IN:= FALSE);
+				LoadcellsState:= ReadLoadcell;
+			END_IF
+		END_IF
+END_CASE
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="FB_init" Id="{7a1f7174-04a6-4341-b9ff-e891e8b5add6}">
+      <Declaration><![CDATA[METHOD FB_init : BOOL
+VAR_INPUT
+	bInitRetains	: BOOL; // if TRUE, the retain variables are initialized (warm start / cold start)
+	bInCopyCode		: BOOL;  // if TRUE, the instance afterwards gets moved into the copy code (online change)
+	ModbusAddresses	: ARRAY[1..MAX_LOADCELLS] OF BYTE; //array of modbus addresses to read, end with a 0 address
+	ReadPeriod		: TIME; //poll the loadcells every ReadPeriod, if this is too short then poll as fast as we can
+END_VAR
+VAR
+	i				: UINT;
+	FoundEnd		: BOOL:= FALSE;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[THIS^.ModbusAddresses:= ModbusAddresses;
+THIS^.ReadPeriod:= ReadPeriod;
+FOR i:= 1 TO MAX_LOADCELLS DO
+	IF THIS^.ModbusAddresses[i] = 0 THEN
+		_numLoadcells:= i - 1;
+		FoundEnd:= TRUE;
+		EXIT;
+	END_IF
+END_FOR
+IF NOT FoundEnd THEN
+	_numLoadcells:= MAX_LOADCELLS;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Init" Id="{a6312c82-5879-415a-aa39-2d95b0ac5865}">
+      <Declaration><![CDATA[METHOD PRIVATE Init
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[LoadcellsState:= ReadLoadcell;
+_cursor:= 1;
+ReadPeriodTimer(IN:= FALSE);]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="NumLoadcells" Id="{93657f55-2037-4911-801d-94d46b92bde6}">
+      <Declaration><![CDATA[PROPERTY PUBLIC NumLoadcells : UINT
+]]></Declaration>
+      <Get Name="Get" Id="{d9f8304c-d698-44f5-8fa4-4a75a8b63243}">
+        <Declaration><![CDATA[]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[NumLoadcells:= _numLoadcells;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+  </POU>
+</TcPlcObject>

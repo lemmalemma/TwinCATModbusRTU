@@ -1,0 +1,155 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <POU Name="FB_Modbus" Id="{37cb420b-3ff4-4dea-b506-01c57effc60c}" SpecialFunc="None">
+    <Declaration><![CDATA[{attribute 'no_explicit_call' := 'do not call FB_Modbus directly'}
+FUNCTION_BLOCK PUBLIC FB_Modbus
+VAR
+	Master				: ModbusRtuMaster_KL6x22B;
+	ModbusData			: ARRAY[1..DATA_SIZE] OF WORD;
+	ModbusState			: (Idle,HR_Start,HR_WaitForResult,HR_Done,HR_Error);
+	CyclicBusy			: BOOL; //TRUE if Cyclic is busy and not ready for a new call to Master to commence
+	InitDone			: BOOL:= FALSE;
+	
+	//read holding registers specific
+	HR_Quantity			: WORD;
+END_VAR
+VAR CONSTANT
+	DATA_SIZE			: INT:= 20; //maximum size of data we can deal with
+	FIRST_REGISTER		: INT:= 1;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="Cyclic" Id="{92aa2a85-fba2-407a-9a40-55d5e0f22af8}">
+      <Declaration><![CDATA[METHOD PUBLIC Cyclic
+VAR_OUTPUT
+	Busy			: BOOL;
+	Error			: BOOL;
+	ErrorID			: MODBUS_ERRORS;
+	FirstRegister	: WORD; //the first register from the read - useful if caller is only interested in a single register
+	AllRegisters	: ARRAY[1..DATA_SIZE] OF WORD; //if more than 1 register is asked for, then the results of the read is copied to here
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT InitDone THEN
+	Init();
+	InitDone:= TRUE;
+END_IF
+
+Master(Execute:= FALSE);
+
+CASE ModbusState OF
+	Idle:
+		CyclicBusy:= FALSE;
+
+	//read holding registers
+	HR_WaitForResult:
+		IF NOT MasterBusy AND NOT MasterError THEN
+			ModbusState:= HR_Done;
+		ELSIF MasterError THEN
+			ModbusState:= HR_Error;
+		END_IF
+		CyclicBusy:= TRUE;
+
+	HR_Done:
+		FirstRegister:= ModbusData[1];
+		IF HR_Quantity > 1 THEN
+			//only do array copy if we need more than one register
+			AllRegisters:= ModbusData;
+		END_IF
+		ModbusState:= Idle;
+		CyclicBusy:= FALSE;
+
+	HR_Error:
+		FirstRegister:= 0;
+		MEMSET(ADR(AllRegisters), 0, SIZEOF(AllRegisters));
+		ModbusState:= Idle;
+		CyclicBusy:= FALSE;
+END_CASE
+
+Busy:= CyclicBusy;
+Error:= MasterError;
+ErrorID:= MasterErrorID;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Init" Id="{aa5cbf96-512e-421b-988e-cb08682779e8}">
+      <Declaration><![CDATA[METHOD PRIVATE Init
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ModbusState:= Idle;
+CyclicBusy:= FALSE;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="MasterBusy" Id="{bba2a00c-7b2d-41fc-95e8-1df0af0b84aa}">
+      <Declaration><![CDATA[PROPERTY PRIVATE MasterBusy : BOOL
+]]></Declaration>
+      <Get Name="Get" Id="{1a24c070-ba2c-4e2e-8f4e-a6c815d598eb}">
+        <Declaration><![CDATA[]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[MasterBusy:= Master.BUSY;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="MasterError" Id="{3c688851-2af6-4b30-adbe-c3857542f95e}">
+      <Declaration><![CDATA[PROPERTY PRIVATE MasterError : BOOL
+]]></Declaration>
+      <Get Name="Get" Id="{0ee59ffa-afb8-4f65-ac70-bed9d027a7ad}">
+        <Declaration><![CDATA[]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[MasterError:= Master.Error;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="MasterErrorID" Id="{e0d284a2-51a4-4687-b81e-e6e4e18a3aec}">
+      <Declaration><![CDATA[PROPERTY PRIVATE MasterErrorID : MODBUS_ERRORS
+]]></Declaration>
+      <Get Name="Get" Id="{7e0bb6e5-babf-4698-995f-5f2d40ff6f8a}">
+        <Declaration><![CDATA[]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[MasterErrorID:= Master.ErrorId;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="ReadHoldingRegisters" Id="{9bae2fad-dde5-41a9-8ecd-5f11d50f5e31}">
+      <Declaration><![CDATA[METHOD PUBLIC ReadHoldingRegisters : BOOL
+//start a new read of holding registers
+VAR_INPUT
+	UnitID			: BYTE; //Modbus station address [1..247]
+	Quantity		: WORD; //number of data words to read
+	MBAddr			: WORD; //Modbus data address to start reading from
+	Timeout			: TIME; //wait for up to this long to get result from slave
+END_VAR
+
+VAR_OUTPUT
+	StartedNewRead	: BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF MasterBusy THEN
+	//can't start a new read if we are busy doing something else
+	StartedNewRead:= FALSE;
+ELSE
+	//we don't do any validity checks as the Master FB does those
+	Master.ReadRegs(
+		UnitID:= UnitID,
+		Quantity:= Quantity,
+		MBAddr:= MBAddr,
+		cbLength:= SIZEOF(ModbusData),
+		pMemoryAddr:= ADR(ModbusData),
+		Execute:= TRUE,
+		Timeout:= Timeout);
+	HR_Quantity:= Quantity;
+	StartedNewRead:= TRUE;
+	ModbusState:= HR_WaitForResult;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>
