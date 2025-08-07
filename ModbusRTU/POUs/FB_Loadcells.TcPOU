@@ -24,6 +24,7 @@ END_VAR]]></Declaration>
       <Declaration><![CDATA[METHOD PUBLIC Cyclic
 VAR_IN_OUT
 	LoadsInKg		: ARRAY[1..MAX_LOADCELLS] OF INT; //loads on loadcells
+	Faults			: ARRAY[1..MAX_LOADCELLS] OF BOOL; //true if loadcell reading fault
 END_VAR
 VAR
 	_allgood		: BOOL;
@@ -66,6 +67,7 @@ CASE LoadcellsState OF
 		Modbus.Cyclic(Busy => _busy, ErrorID => _errorID, FirstRegister => kg);
 		IF NOT _busy THEN
 			ModbusErrors[_cursor]:= _errorID;
+			Faults[_cursor]:= _errorID <> MODBUSERROR_NO_ERROR;
 			IF _errorID <> MODBUSERROR_NO_ERROR THEN
 				LoadsInKg[_cursor]:= ERROR_VALUE; //vague error reporting effort
 				LoadcellsState:= GetReadyForNextRead;
@@ -89,6 +91,7 @@ CASE LoadcellsState OF
 		IF NOT _busy THEN
 			LoadsInKg[_cursor]:= WORD_TO_INT(kg) - WORD_TO_INT(tare); //use INT as Kinesys load cells return an INT over Modbus RTU
 			ModbusErrors[_cursor]:= _errorID;
+			Faults[_cursor]:= _errorID <> MODBUSERROR_NO_ERROR;
 			IF _errorID <> MODBUSERROR_NO_ERROR THEN
 				LoadsInKg[_cursor]:= ERROR_VALUE; //vague error reporting effort
 			END_IF

@@ -5,6 +5,7 @@
 VAR
 	Loadcells			: FB_Loadcells(ModbusAddresses:= LoadcellAddresses, ReadPeriod:= T#1s);
 	LoadsInKg			: ARRAY[1..MAX_LOADCELLS] OF INT; //loads on loadcells
+	LoadcellFaults		: ARRAY[1..MAX_LOADCELLS] OF BOOL; //faults on reading loadcells
 END_VAR
 VAR CONSTANT
 	MAX_LOADCELLS		: UINT:= 10;
@@ -12,7 +13,7 @@ VAR CONSTANT
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[Loadcells.Cyclic(LoadsInKg:= LoadsInKg);
+      <ST><![CDATA[Loadcells.Cyclic(LoadsInKg:= LoadsInKg, Faults:= LoadcellFaults);
 ]]></ST>
     </Implementation>
   </POU>
