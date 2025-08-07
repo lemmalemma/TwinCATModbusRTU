@@ -4,7 +4,7 @@
     <Declaration><![CDATA[PROGRAM MAIN
 VAR
 	Loadcells			: FB_Loadcells(ModbusAddresses:= LoadcellAddresses, ReadPeriod:= T#1s);
-	LoadsInKg			: ARRAY[1..MAX_LOADCELLS] OF UINT; //loads on loadcells
+	LoadsInKg			: ARRAY[1..MAX_LOADCELLS] OF INT; //loads on loadcells
 END_VAR
 VAR CONSTANT
 	MAX_LOADCELLS		: UINT:= 10;

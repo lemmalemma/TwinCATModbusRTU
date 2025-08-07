@@ -53,7 +53,7 @@
 		</DataType>
 	</DataTypes>
 	<Project GUID="{949A582C-26CD-4BD6-8075-6941B0B2368E}" Name="ModbusRTU" PrjFilePath="..\..\ModbusRTU\ModbusRTU.plcproj" TmcFilePath="..\..\ModbusRTU\ModbusRTU.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-		<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="ModbusRTU\ModbusRTU.tmc" TmcHash="{72F763FE-5874-EF2E-B664-4CA102295147}">
+		<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="ModbusRTU\ModbusRTU.tmc" TmcHash="{4CEDBB97-5D94-FB72-58AE-8BC3BF367C90}">
 			<Name>ModbusRTU Instance</Name>
 			<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 			<Vars VarGrpType="1">

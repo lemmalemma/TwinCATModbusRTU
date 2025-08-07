@@ -22,7 +22,7 @@ END_VAR]]></Declaration>
     <Method Name="Cyclic" Id="{aa7f379c-9425-48cf-ba41-6b733da6dc4d}">
       <Declaration><![CDATA[METHOD PUBLIC Cyclic
 VAR_IN_OUT
-	LoadsInKg		: ARRAY[1..MAX_LOADCELLS] OF UINT; //loads on loadcells
+	LoadsInKg		: ARRAY[1..MAX_LOADCELLS] OF INT; //loads on loadcells
 END_VAR
 VAR
 	_allgood		: BOOL;
@@ -65,8 +65,11 @@ CASE LoadcellsState OF
 	WaitForResult:
 		Modbus.Cyclic(Busy => _busy, ErrorID => _errorID, FirstRegister => kg);
 		IF NOT _busy THEN
-			LoadsInKg[_cursor]:= WORD_TO_UINT(kg);
+			LoadsInKg[_cursor]:= WORD_TO_INT(kg); //use INT as Kinesys load cells return an INT over Modbus RTU
 			ModbusErrors[_cursor]:= _errorID;
+			IF _errorID <> MODBUSERROR_NO_ERROR THEN
+				LoadsInKg[_cursor]:= -9999; //vague error reporting effort
+			END_IF
 			LoadcellsState:= GetReadyForNextRead;
 		END_IF
 
