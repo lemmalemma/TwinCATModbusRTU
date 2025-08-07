@@ -8,8 +8,9 @@ VAR
 END_VAR
 VAR CONSTANT
 	MAX_LOADCELLS		: UINT:= 10;
-	LoadcellAddresses	: ARRAY[1..MAX_LOADCELLS] OF BYTE:= [1,2,3,4,0];
-END_VAR]]></Declaration>
+	LoadcellAddresses	: ARRAY[1..MAX_LOADCELLS] OF BYTE:= [1,2,3,4,0]; //must end with 0
+END_VAR
+]]></Declaration>
     <Implementation>
       <ST><![CDATA[Loadcells.Cyclic(LoadsInKg:= LoadsInKg);
 ]]></ST>

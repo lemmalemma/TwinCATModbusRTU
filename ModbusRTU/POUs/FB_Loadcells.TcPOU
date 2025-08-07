@@ -9,12 +9,13 @@ VAR
 	ModbusErrors	: ARRAY[1..MAX_LOADCELLS] OF MODBUS_ERRORS; //keep track of errors
 	_numLoadcells	: UINT; //number of actual addresses to read from above array
 	ReadPeriod		: TIME; //poll the loadcells with this period if we can, else just go as fast as we can
-	LoadcellsState	: (Idle,ReadLoadcell,WaitForResult,GetReadyForNextRead,Error);
+	LoadcellsState	: (Idle,ReadLoadcellKg,WaitForKgResult,ReadLoadcellTare,WaitForTareResult,GetReadyForNextRead);
 	_cursor			: UINT;
 	ReadPeriodTimer	: TON;
 END_VAR
 VAR CONSTANT
 	MAX_LOADCELLS	: UINT:= 10;
+	ERROR_VALUE		: INT:= -9999;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[]]></ST>
@@ -31,6 +32,7 @@ VAR
 END_VAR
 VAR_INST
 	kg				: WORD;
+	tare			: WORD;
 	InitDone		: BOOL:= FALSE;
 END_VAR
 ]]></Declaration>
@@ -46,29 +48,49 @@ END_IF
 
 ReadPeriodTimer(IN:= TRUE, PT:= ReadPeriod);
 
-//Modbus.Cyclic();
-
 CASE LoadcellsState OF
 	Idle:
 		//
 
-	ReadLoadcell:
+	ReadLoadcellKg:
 		Modbus.ReadHoldingRegisters(UnitID:= ModbusAddresses[_cursor],
 										Quantity:= 1, //only interested in a single register
 										MBAddr:= 0, //the first in-fact (400001 is current load in kg)
 										Timeout:= T#1S,
 										StartedNewRead => _allgood);
 		IF _allgood THEN
-			LoadcellsState:= WaitForResult;
+			LoadcellsState:= WaitForKgResult;
 		END_IF
 
-	WaitForResult:
+	WaitForKgResult:
 		Modbus.Cyclic(Busy => _busy, ErrorID => _errorID, FirstRegister => kg);
 		IF NOT _busy THEN
-			LoadsInKg[_cursor]:= WORD_TO_INT(kg); //use INT as Kinesys load cells return an INT over Modbus RTU
 			ModbusErrors[_cursor]:= _errorID;
 			IF _errorID <> MODBUSERROR_NO_ERROR THEN
-				LoadsInKg[_cursor]:= -9999; //vague error reporting effort
+				LoadsInKg[_cursor]:= ERROR_VALUE; //vague error reporting effort
+				LoadcellsState:= GetReadyForNextRead;
+			ELSE
+				LoadcellsState:= ReadLoadcellTare;
+			END_IF
+		END_IF
+
+	ReadLoadcellTare:
+		Modbus.ReadHoldingRegisters(UnitID:= ModbusAddresses[_cursor],
+										Quantity:= 1,
+										MBAddr:= 6, //400007 is load cell tare load in kg
+										Timeout:= T#1S,
+										StartedNewRead => _allgood);
+		IF _allgood THEN
+			LoadcellsState:= WaitForTareResult;
+		END_IF
+
+	WaitForTareResult:
+		Modbus.Cyclic(Busy => _busy, ErrorID => _errorID, FirstRegister => tare);
+		IF NOT _busy THEN
+			LoadsInKg[_cursor]:= WORD_TO_INT(kg) - WORD_TO_INT(tare); //use INT as Kinesys load cells return an INT over Modbus RTU
+			ModbusErrors[_cursor]:= _errorID;
+			IF _errorID <> MODBUSERROR_NO_ERROR THEN
+				LoadsInKg[_cursor]:= ERROR_VALUE; //vague error reporting effort
 			END_IF
 			LoadcellsState:= GetReadyForNextRead;
 		END_IF
@@ -76,12 +98,12 @@ CASE LoadcellsState OF
 	GetReadyForNextRead:
 		IF _cursor < NumLoadcells THEN
 			_cursor:= _cursor + 1;
-			LoadcellsState:= ReadLoadcell;
+			LoadcellsState:= ReadLoadcellKg;
 		ELSE
 			IF ReadPeriodTimer.Q THEN
 				_cursor:= 1;
 				ReadPeriodTimer(IN:= FALSE);
-				LoadcellsState:= ReadLoadcell;
+				LoadcellsState:= ReadLoadcellKg;
 			END_IF
 		END_IF
 END_CASE
@@ -122,7 +144,7 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[LoadcellsState:= ReadLoadcell;
+        <ST><![CDATA[LoadcellsState:= ReadLoadcellKg;
 _cursor:= 1;
 ReadPeriodTimer(IN:= FALSE);]]></ST>
       </Implementation>
