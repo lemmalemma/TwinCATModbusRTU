@@ -60,6 +60,22 @@
       <SubType>Content</SubType>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <SubObject Include="FB_Loadcells.Cyclic" />
+    <SubObject Include="FB_Loadcells.FB_init" />
+    <SubObject Include="FB_Loadcells.Init" />
+    <SubObject Include="FB_Loadcells.NumLoadcells" />
+    <SubObject Include="FB_Loadcells.NumLoadcells.Get" />
+    <SubObject Include="FB_Modbus.Cyclic" />
+    <SubObject Include="FB_Modbus.Init" />
+    <SubObject Include="FB_Modbus.MasterBusy" />
+    <SubObject Include="FB_Modbus.MasterBusy.Get" />
+    <SubObject Include="FB_Modbus.MasterError" />
+    <SubObject Include="FB_Modbus.MasterError.Get" />
+    <SubObject Include="FB_Modbus.MasterErrorID" />
+    <SubObject Include="FB_Modbus.MasterErrorID.Get" />
+    <SubObject Include="FB_Modbus.ReadHoldingRegisters" />
+  </ItemGroup>
   <ProjectExtensions>
     <PlcProjectOptions>
       <XmlArchive>

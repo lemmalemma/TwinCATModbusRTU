@@ -53,7 +53,7 @@
 		</DataType>
 	</DataTypes>
 	<Project GUID="{949A582C-26CD-4BD6-8075-6941B0B2368E}" Name="ModbusRTU" PrjFilePath="..\..\ModbusRTU\ModbusRTU.plcproj" TmcFilePath="..\..\ModbusRTU\ModbusRTU.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-		<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="ModbusRTU\ModbusRTU.tmc" TmcHash="{C825F184-C69E-EBCB-E200-1CD4BF170B10}">
+		<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="ModbusRTU\ModbusRTU.tmc" TmcHash="{72F763FE-5874-EF2E-B664-4CA102295147}">
 			<Name>ModbusRTU Instance</Name>
 			<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 			<Vars VarGrpType="1">
@@ -90,4 +90,56 @@
 			</TaskPouOids>
 		</Instance>
 	</Project>
+	<Mappings>
+		<OwnerA Name="ModbusRTU Instance">
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 1 (EK1100)^Term 2 (EL6021)">
+				<Link VarA="PlcTask Inputs^MAIN.Loadcells.Modbus.Master.InData^D[0]" VarB="COM TxPDO-Map Inputs^Data In 0"/>
+				<Link VarA="PlcTask Inputs^MAIN.Loadcells.Modbus.Master.InData^D[10]" VarB="COM TxPDO-Map Inputs^Data In 10"/>
+				<Link VarA="PlcTask Inputs^MAIN.Loadcells.Modbus.Master.InData^D[11]" VarB="COM TxPDO-Map Inputs^Data In 11"/>
+				<Link VarA="PlcTask Inputs^MAIN.Loadcells.Modbus.Master.InData^D[12]" VarB="COM TxPDO-Map Inputs^Data In 12"/>
+				<Link VarA="PlcTask Inputs^MAIN.Loadcells.Modbus.Master.InData^D[13]" VarB="COM TxPDO-Map Inputs^Data In 13"/>
+				<Link VarA="PlcTask Inputs^MAIN.Loadcells.Modbus.Master.InData^D[14]" VarB="COM TxPDO-Map Inputs^Data In 14"/>
+				<Link VarA="PlcTask Inputs^MAIN.Loadcells.Modbus.Master.InData^D[15]" VarB="COM TxPDO-Map Inputs^Data In 15"/>
+				<Link VarA="PlcTask Inputs^MAIN.Loadcells.Modbus.Master.InData^D[16]" VarB="COM TxPDO-Map Inputs^Data In 16"/>
+				<Link VarA="PlcTask Inputs^MAIN.Loadcells.Modbus.Master.InData^D[17]" VarB="COM TxPDO-Map Inputs^Data In 17"/>
+				<Link VarA="PlcTask Inputs^MAIN.Loadcells.Modbus.Master.InData^D[18]" VarB="COM TxPDO-Map Inputs^Data In 18"/>
+				<Link VarA="PlcTask Inputs^MAIN.Loadcells.Modbus.Master.InData^D[19]" VarB="COM TxPDO-Map Inputs^Data In 19"/>
+				<Link VarA="PlcTask Inputs^MAIN.Loadcells.Modbus.Master.InData^D[1]" VarB="COM TxPDO-Map Inputs^Data In 1"/>
+				<Link VarA="PlcTask Inputs^MAIN.Loadcells.Modbus.Master.InData^D[20]" VarB="COM TxPDO-Map Inputs^Data In 20"/>
+				<Link VarA="PlcTask Inputs^MAIN.Loadcells.Modbus.Master.InData^D[21]" VarB="COM TxPDO-Map Inputs^Data In 21"/>
+				<Link VarA="PlcTask Inputs^MAIN.Loadcells.Modbus.Master.InData^D[2]" VarB="COM TxPDO-Map Inputs^Data In 2"/>
+				<Link VarA="PlcTask Inputs^MAIN.Loadcells.Modbus.Master.InData^D[3]" VarB="COM TxPDO-Map Inputs^Data In 3"/>
+				<Link VarA="PlcTask Inputs^MAIN.Loadcells.Modbus.Master.InData^D[4]" VarB="COM TxPDO-Map Inputs^Data In 4"/>
+				<Link VarA="PlcTask Inputs^MAIN.Loadcells.Modbus.Master.InData^D[5]" VarB="COM TxPDO-Map Inputs^Data In 5"/>
+				<Link VarA="PlcTask Inputs^MAIN.Loadcells.Modbus.Master.InData^D[6]" VarB="COM TxPDO-Map Inputs^Data In 6"/>
+				<Link VarA="PlcTask Inputs^MAIN.Loadcells.Modbus.Master.InData^D[7]" VarB="COM TxPDO-Map Inputs^Data In 7"/>
+				<Link VarA="PlcTask Inputs^MAIN.Loadcells.Modbus.Master.InData^D[8]" VarB="COM TxPDO-Map Inputs^Data In 8"/>
+				<Link VarA="PlcTask Inputs^MAIN.Loadcells.Modbus.Master.InData^D[9]" VarB="COM TxPDO-Map Inputs^Data In 9"/>
+				<Link VarA="PlcTask Inputs^MAIN.Loadcells.Modbus.Master.InData^Status" VarB="COM TxPDO-Map Inputs^Status"/>
+				<Link VarA="PlcTask Outputs^MAIN.Loadcells.Modbus.Master.OutData^Ctrl" VarB="COM RxPDO-Map Outputs^Ctrl"/>
+				<Link VarA="PlcTask Outputs^MAIN.Loadcells.Modbus.Master.OutData^D[0]" VarB="COM RxPDO-Map Outputs^Data Out 0"/>
+				<Link VarA="PlcTask Outputs^MAIN.Loadcells.Modbus.Master.OutData^D[10]" VarB="COM RxPDO-Map Outputs^Data Out 10"/>
+				<Link VarA="PlcTask Outputs^MAIN.Loadcells.Modbus.Master.OutData^D[11]" VarB="COM RxPDO-Map Outputs^Data Out 11"/>
+				<Link VarA="PlcTask Outputs^MAIN.Loadcells.Modbus.Master.OutData^D[12]" VarB="COM RxPDO-Map Outputs^Data Out 12"/>
+				<Link VarA="PlcTask Outputs^MAIN.Loadcells.Modbus.Master.OutData^D[13]" VarB="COM RxPDO-Map Outputs^Data Out 13"/>
+				<Link VarA="PlcTask Outputs^MAIN.Loadcells.Modbus.Master.OutData^D[14]" VarB="COM RxPDO-Map Outputs^Data Out 14"/>
+				<Link VarA="PlcTask Outputs^MAIN.Loadcells.Modbus.Master.OutData^D[15]" VarB="COM RxPDO-Map Outputs^Data Out 15"/>
+				<Link VarA="PlcTask Outputs^MAIN.Loadcells.Modbus.Master.OutData^D[16]" VarB="COM RxPDO-Map Outputs^Data Out 16"/>
+				<Link VarA="PlcTask Outputs^MAIN.Loadcells.Modbus.Master.OutData^D[17]" VarB="COM RxPDO-Map Outputs^Data Out 17"/>
+				<Link VarA="PlcTask Outputs^MAIN.Loadcells.Modbus.Master.OutData^D[18]" VarB="COM RxPDO-Map Outputs^Data Out 18"/>
+				<Link VarA="PlcTask Outputs^MAIN.Loadcells.Modbus.Master.OutData^D[19]" VarB="COM RxPDO-Map Outputs^Data Out 19"/>
+				<Link VarA="PlcTask Outputs^MAIN.Loadcells.Modbus.Master.OutData^D[1]" VarB="COM RxPDO-Map Outputs^Data Out 1"/>
+				<Link VarA="PlcTask Outputs^MAIN.Loadcells.Modbus.Master.OutData^D[20]" VarB="COM RxPDO-Map Outputs^Data Out 20"/>
+				<Link VarA="PlcTask Outputs^MAIN.Loadcells.Modbus.Master.OutData^D[21]" VarB="COM RxPDO-Map Outputs^Data Out 21"/>
+				<Link VarA="PlcTask Outputs^MAIN.Loadcells.Modbus.Master.OutData^D[2]" VarB="COM RxPDO-Map Outputs^Data Out 2"/>
+				<Link VarA="PlcTask Outputs^MAIN.Loadcells.Modbus.Master.OutData^D[3]" VarB="COM RxPDO-Map Outputs^Data Out 3"/>
+				<Link VarA="PlcTask Outputs^MAIN.Loadcells.Modbus.Master.OutData^D[4]" VarB="COM RxPDO-Map Outputs^Data Out 4"/>
+				<Link VarA="PlcTask Outputs^MAIN.Loadcells.Modbus.Master.OutData^D[5]" VarB="COM RxPDO-Map Outputs^Data Out 5"/>
+				<Link VarA="PlcTask Outputs^MAIN.Loadcells.Modbus.Master.OutData^D[6]" VarB="COM RxPDO-Map Outputs^Data Out 6"/>
+				<Link VarA="PlcTask Outputs^MAIN.Loadcells.Modbus.Master.OutData^D[7]" VarB="COM RxPDO-Map Outputs^Data Out 7"/>
+				<Link VarA="PlcTask Outputs^MAIN.Loadcells.Modbus.Master.OutData^D[8]" VarB="COM RxPDO-Map Outputs^Data Out 8"/>
+				<Link VarA="PlcTask Outputs^MAIN.Loadcells.Modbus.Master.OutData^D[9]" VarB="COM RxPDO-Map Outputs^Data Out 9"/>
+			</OwnerB>
+		</OwnerA>
+	</Mappings>
 </TcSmItem>

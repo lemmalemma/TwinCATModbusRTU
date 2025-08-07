@@ -27,6 +27,7 @@ END_VAR
 VAR
 	_allgood		: BOOL;
 	_busy			: BOOL;
+	_errorID		: MODBUS_ERRORS;
 END_VAR
 VAR_INST
 	kg				: WORD;
@@ -45,6 +46,8 @@ END_IF
 
 ReadPeriodTimer(IN:= TRUE, PT:= ReadPeriod);
 
+//Modbus.Cyclic();
+
 CASE LoadcellsState OF
 	Idle:
 		//
@@ -60,9 +63,10 @@ CASE LoadcellsState OF
 		END_IF
 
 	WaitForResult:
-		Modbus.Cyclic(Busy => _busy, ErrorID => ModbusErrors[_cursor], FirstRegister => kg);
+		Modbus.Cyclic(Busy => _busy, ErrorID => _errorID, FirstRegister => kg);
 		IF NOT _busy THEN
 			LoadsInKg[_cursor]:= WORD_TO_UINT(kg);
+			ModbusErrors[_cursor]:= _errorID;
 			LoadcellsState:= GetReadyForNextRead;
 		END_IF
 
@@ -123,7 +127,7 @@ ReadPeriodTimer(IN:= FALSE);]]></ST>
     <Property Name="NumLoadcells" Id="{93657f55-2037-4911-801d-94d46b92bde6}">
       <Declaration><![CDATA[PROPERTY PUBLIC NumLoadcells : UINT
 ]]></Declaration>
-      <Get Name="Get" Id="{d9f8304c-d698-44f5-8fa4-4a75a8b63243}">
+      <Get Name="Get" Id="{d9e352ce-4790-461c-a154-1b69e54831ab}">
         <Declaration><![CDATA[]]></Declaration>
         <Implementation>
           <ST><![CDATA[NumLoadcells:= _numLoadcells;

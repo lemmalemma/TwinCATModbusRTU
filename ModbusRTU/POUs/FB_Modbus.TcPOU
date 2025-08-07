@@ -6,7 +6,7 @@ FUNCTION_BLOCK PUBLIC FB_Modbus
 VAR
 	Master				: ModbusRtuMaster_KL6x22B;
 	ModbusData			: ARRAY[1..DATA_SIZE] OF WORD;
-	ModbusState			: (Idle,HR_Start,HR_WaitForResult,HR_Done,HR_Error);
+	ModbusState			: (Idle,HR_WaitForResult,HR_Done,HR_Error);
 	CyclicBusy			: BOOL; //TRUE if Cyclic is busy and not ready for a new call to Master to commence
 	InitDone			: BOOL:= FALSE;
 	
@@ -32,12 +32,7 @@ VAR_OUTPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF NOT InitDone THEN
-	Init();
-	InitDone:= TRUE;
-END_IF
-
-Master(Execute:= FALSE);
+        <ST><![CDATA[Master.ReadRegs(Execute:= FALSE);
 
 CASE ModbusState OF
 	Idle:
@@ -78,15 +73,18 @@ ErrorID:= MasterErrorID;
       <Declaration><![CDATA[METHOD PRIVATE Init
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[ModbusState:= Idle;
-CyclicBusy:= FALSE;
+        <ST><![CDATA[IF NOT InitDone THEN
+	ModbusState:= Idle;
+	CyclicBusy:= FALSE;
+	InitDone:= TRUE;
+END_IF
 ]]></ST>
       </Implementation>
     </Method>
     <Property Name="MasterBusy" Id="{bba2a00c-7b2d-41fc-95e8-1df0af0b84aa}">
       <Declaration><![CDATA[PROPERTY PRIVATE MasterBusy : BOOL
 ]]></Declaration>
-      <Get Name="Get" Id="{1a24c070-ba2c-4e2e-8f4e-a6c815d598eb}">
+      <Get Name="Get" Id="{280bd898-1650-4d59-9cec-cda8822c3ead}">
         <Declaration><![CDATA[]]></Declaration>
         <Implementation>
           <ST><![CDATA[MasterBusy:= Master.BUSY;
@@ -97,7 +95,7 @@ CyclicBusy:= FALSE;
     <Property Name="MasterError" Id="{3c688851-2af6-4b30-adbe-c3857542f95e}">
       <Declaration><![CDATA[PROPERTY PRIVATE MasterError : BOOL
 ]]></Declaration>
-      <Get Name="Get" Id="{0ee59ffa-afb8-4f65-ac70-bed9d027a7ad}">
+      <Get Name="Get" Id="{bb03d880-f29f-4c3d-9ffb-34052a779781}">
         <Declaration><![CDATA[]]></Declaration>
         <Implementation>
           <ST><![CDATA[MasterError:= Master.Error;
@@ -108,7 +106,7 @@ CyclicBusy:= FALSE;
     <Property Name="MasterErrorID" Id="{e0d284a2-51a4-4687-b81e-e6e4e18a3aec}">
       <Declaration><![CDATA[PROPERTY PRIVATE MasterErrorID : MODBUS_ERRORS
 ]]></Declaration>
-      <Get Name="Get" Id="{7e0bb6e5-babf-4698-995f-5f2d40ff6f8a}">
+      <Get Name="Get" Id="{825bc950-db62-4889-892a-d3a60e0e857e}">
         <Declaration><![CDATA[]]></Declaration>
         <Implementation>
           <ST><![CDATA[MasterErrorID:= Master.ErrorId;
@@ -131,7 +129,8 @@ VAR_OUTPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF MasterBusy THEN
+        <ST><![CDATA[Init();
+IF MasterBusy THEN
 	//can't start a new read if we are busy doing something else
 	StartedNewRead:= FALSE;
 ELSE
